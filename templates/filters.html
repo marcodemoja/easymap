@@ -1,0 +1,27 @@
+<div id="storelocator-filters" class=" filterClose">
+	<div id="storelocator-filter-button">
+	<span class="filtersCount"><%= activeFiltersCount %></span>
+    <span><%= labels.filtriattivi %></span> <span class="icon_arrow-up"></span></div>
+	<div class="filters-container">
+    	    <% _.each(store_collections, function(filter){ %>
+			    <p class="filter-item"><input checked="checked" value="<%= filter.value %>" type="checkbox" name="storelocator-filter-select" class="storelocator-filter-select filter-checked" /><label><%= filter.label %></label></p>
+		    <% }); %>
+        <div id="storelocator-filter-separator"></div>
+       	    <%  _.each(store_types, function(filter){ %>
+			    <div class="filter-item"><input checked="" value="<%= filter.value %>" type="checkbox" name="storelocator-filter-select-store-type" class="storelocator-filter-select-store-type filter-checked-store-type" />
+				    <% if(filter.label == 'STONE ISLAND STORE') %>
+					    <!--<div class="filter-store-icon"> </div>-->
+				        <!--	<span class="icon_pin2_store_locator"> </span> -->
+				        <div class="pinB"></div>
+                    <!--<img src="http://cdn3.yoox.biz/stoneisland/wp-content/themes/stoneisland-mobile/pin_A_small.png?1"> -->
+				    <% else{ %>
+					    <!--<span class="icon_pin_store_locator"> </span>
+					    <!--<div class="filter-multi-icon"> </div>-->
+                    <div class="pinA"></div>
+                  <!--  <img src="http://cdn3.yoox.biz/stoneisland/wp-content/themes/stoneisland-mobile/pin_B_small.png?1"> -->
+				    <% } %>
+				    <div class="label"><%= filter.label %></div>
+			    </div>
+		    <% }); %>
+    </div>
+</div>

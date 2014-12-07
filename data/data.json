@@ -1,0 +1,4 @@
+[
+ {"ID":"1","title":"test-title","lat": "57.049362","lng": "9.918987","distance":false,"continent":"Asia","country":"Japan","city":"Tokyo","isocode":"JP","filters":["120","121"]},
+ {"ID":"2","title":"test-title2","lat": "57.049362","lng": "9.918987","distance":false,"continent":"Europe","country":"Italy","city":"Rome","isocode":"IT","filters":["120","122"]}
+]

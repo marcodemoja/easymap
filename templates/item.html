@@ -1,0 +1,39 @@
+<% _.each(items, function(item){
+    var classPadding = 'padding-top:0px';
+    if(item.attributes.opening_times != ''){
+            classPadding = '';
+    }
+
+%>
+            <li class="storelocator-item-list" id="itemList<%= item.attributes.id %>" data-lat="<%= item.attributes.lat %>" data-lng="<%= item.attributes.lng %>">
+               <div class="storelocator-expand-item-list-btn btn-close block"><div class="icon_plus"> </div></div>
+               <div class="storelocator-icon-store-item-list block">
+               	 <img src="<%= item.attributes.icon %>" />
+               </div>
+               <div class="storelocator-info-item-list block">
+                   <h3 class="itemTitle title<%= item.attributes.id %>"><%= item.attributes.name %></h3>
+                   <p><%= item.attributes.gmap_address %> - <%= item.attributes.city %></p>
+               </div>
+               <div class="storelocator-get-direction-btn block"><p><a href="#" onclick="$(this).attr('href' , 'https://maps.google.com/maps?daddr=<%= item.attributes.lat %>,<%= item.attributes.lng %>&saddr='+$('#searchedCoords').val());" target="_blank"><%= labels.getdirection %></a></p></div>
+               <div  style="<%= classPadding %>" class="storelocator-additional-info-item-list hide">
+               		<div class="opening-time">
+              		<% if(item.attributes.opening_times != ''){ %>
+               					<%= item.attributes.opening_times %>
+ 					<% } %>
+               		</div>
+ 					<% if(item.attributes.phone != ''){ %>
+               			<div class="phone box"><div class="marginauto"><a class="icon_phone" href="tel:<%= item.attributes.phone %>"><%= item.attributes.phone %></a></div></div>
+               		<% } %>
+               		<% if(item.attributes.email != '' && item.attributes.email != 'NO MAIL' ){ %>
+               			<div class="email box"><div class="marginauto"><a class="icon_mail" href="mailto:<%= item.attributes.email %>">SEND EMAIL</a></div></div>
+               		<% } %>
+               		<div class="box brands">
+               			<h2>BRANDS IN STORE:</h2>
+               		<!--	<p><%= item.attributes.store_type_name %></p> -->
+               			<% _.each(item.attributes.store_collections_names,function(collection){ %>
+               				<p><%= collection  %></p>
+               			<% }); %>
+               		</div>
+               </div>
+            </li>
+<% }); %>    

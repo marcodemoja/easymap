@@ -1,0 +1,16 @@
+{
+  "name": "easyMap",
+  "version": "0.0.1",
+  "private": true,
+  "directories": {
+    "doc": "reference",
+    "test": "tests"
+  },
+  "dependencies":{
+	"jquery":"*",
+	"requirejs": "*",
+	"backbonejs": "*",
+	"json2": "*",
+	"underscore": "*"
+   }
+ }
