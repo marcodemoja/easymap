@@ -1,7 +1,6 @@
     require(EasyMapModules,function(){
     
         require(['EasyMap'],function(EasyMap){
-                console.log(EasyMap);
                 // customize your map options
                 var mapOptions = {
                         zoom: 6,
@@ -29,7 +28,6 @@
                 };
                 markersIconCondition.icon =  'http://cdn3.yoox.biz/napapijri/wp-content/images/pin-2x.png?bust=' +  (new Date()).getTime() +'';
                 filters = {};
-                console.log(EasyMap);
                 EasyMap.initApp(mapOptions,markersIconCondition,filters,function(){});
         });
     });

@@ -19,7 +19,7 @@ define([
          
          markersInBound:[],
          
-         useClusters:true,
+         useClusters:false,
          
          markersIconCondition:null,
          
@@ -43,6 +43,7 @@ define([
          	var that  = this;
             var result;
          	this.collection = app.Collections.Points;
+
         },
       	
       	activate: function(mapOptions) {
@@ -78,14 +79,12 @@ define([
          	return this;
          	
          },
-        /**
-      	 Refresh results list with the lasts stores found
-      	**/
-    	 refreshResultList: function(){
-    		//app.Views.ListView.refreshByVisibleMarkers(this.markers);
-             app.Views.ListView.addElements(this.stores);
-    	 },
 
+         refresh: function(){
+            this.removeMarkers();
+            this.addMarkers();
+         },
+       
          filterResultsList: function(){
 
          },
@@ -94,7 +93,7 @@ define([
           * This method append a div with class storelocator-loader to the map container (this.$el)
           */
       	addLoader: function(){
-      		var loader = $('<div>').addClass('storelocator-loader');
+      		var loader = $('<div>').addClass('easymap-loader');
       		//console.log(this.$el);
       		this.$el.append(loader);
       	},
@@ -103,7 +102,7 @@ define([
           * This method remove the loader
           */
         removeLoader: function(){
-      		$('.storelocator-loader').remove();
+      		$('.easymap-loader').remove();
       	},
         /*
         * Render markers closest to address passed as argument
@@ -262,8 +261,9 @@ define([
          },
          
          removeMarkers: function(){
-         	return _.each(app.Views.MapView.markers,function(el,index,list){
+         	return _.each(this.markers,function(el,index,list){
          			el.setMap(null);
+                    unset(this.markers[index]);
          	});
          },
 
@@ -374,8 +374,8 @@ define([
          
          addMarkers:function(){
          	var self = this;
-            _.each(this.stores.models,function(store,index,list){
-         		var position = new google.maps.LatLng( store.attributes.lat, store.attributes.lng);
+            _.each(this.collection.models,function(point,index,list){
+         		var position = new google.maps.LatLng( point.attributes.lat, point.attributes.lng);
          		var iconUrl  = '';
                 var iconSize =  new google.maps.Size(23, 36);
          		var filters  = [];
@@ -386,18 +386,18 @@ define([
                         iconUrl = self.markersIconCondition.icon;
                     }else{
                         _.each(self.markersIconCondition.values,function(value,key){
-                            if(store.attributes[self.markersIconCondition.column] == key){
+                            if(point.attributes[self.markersIconCondition.column] == key){
                                 iconUrl = value;
                             }
                         });
                     }
                 }
-         		for(var i in store.attributes.store_collections){
+         		/*for(var i in point.attributes.store_collections){
          			filter = _.keys(store.attributes.store_collections[i]).toString();
          			filters.push(filter);
-         		}
+         		}*/
          		 
-         		filters.push(store.attributes.store_type_id);
+         		//filters.push(point.attributes.store_type_id);
          		
                 if(iconUrl !== ''){
                     var iconImage = new google.maps.MarkerImage(iconUrl,
@@ -412,12 +412,11 @@ define([
                 var marker = new google.maps.Marker({
 		        	position: position,
 		            map: self.map,
-		            title: store.attributes.post_title,
+		            title: point.attributes.title,
 		            visible:true,
 		            icon:iconImage,
-		            storeId:store.attributes.ID,
-                    formattedAddress:store.attributes["wpcf-yoox-store-address"],
-                    attributes: store.attributes
+		            emId:point.attributes.ID,
+                    attributes: point.attributes
                     //storeTypeId:store.attributes.store_type_id,
 		            //filters:filters
 		        });
@@ -448,7 +447,7 @@ define([
 		    	
 		    	this.clusterizeMarkers(this.clusterOptions);
 		     }
-		     this.trigger('markersAddress');
+		     this.trigger('markersready');
 		     //console.log(this.markers);
          }
      }); //-- End of Map view

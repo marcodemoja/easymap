@@ -32,8 +32,8 @@ define([
         	//this.model      = app.Models.Point;
         	this.collection = app.Collections.Points;
 
-            /*Refresh all views when collection changing*/
-            this.listenTo(this.collection,"changed",this.refresh);
+            this.listenTo(this.collection,'sync changed',this.refresh);
+
         },
     
         initApp: function(mapOptions,markersIconCondition,filters,_callback){
@@ -46,12 +46,15 @@ define([
             var self = this;
         	//this.setMarkersIconConditions(markersIconCondition);
         	this.mapOptions = mapOptions;
+            app.Views.MapView.markersIconCondition = markersIconCondition;
             
             this.renderApp();
+            if(typeof(_callback) !== 'undefined')
+                _callback();    
+            
+            this.collection.fetch();
            // this.prepareEvents();
             
-            if(typeof(_callback) !== 'undefined')
-                _callback();
         },
 
         renderApp:function(){
@@ -63,6 +66,8 @@ define([
 
         refresh: function(){
             console.log('refreshAll');
+            app.Views.MapView.refresh();
+            app.Views.ListView.refresh();
         },
 
         findAround: function(position,filters,_callback){
