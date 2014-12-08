@@ -1,19 +1,16 @@
 define([
-	'app/views/app',
-	'app/views/map'
-	],function(EasyMap,mapView){
-
+	'app/views/app'
+	],function(appView){
 		describe('App.Views.AppView',function(){
 			this.appView,this.mapView,this.spyAppView,this.spyMapView;
 			
 			beforeEach(function () {
-					this.appView = EasyMap;
-					this.mapView = mapView;
-					this.spyAppView = sinon.spy(this.appView,'init');
-					this.spyMapView = sinon.spy(this.mapView,'activate');
+					this.EasyMap = EasyMap;
+					console.log(EasyMap);
+					this.spyAppViewInit     = sinon.spy(this.EasyMap.Views.appView,'init');
+					this.spyMapViewActivate = sinon.spy(this.EasyMap.Views.mapView,'activate');
 					
-					/*var fixtures = '<div id="easymap"></div>';
-					$('body').append(fixtures);*/
+					
 
 					var mapOptions = {
                         zoom: 6,
@@ -40,14 +37,12 @@ define([
 	                };
 	                markersIconCondition.icon =  'http://cdn3.yoox.biz/napapijri/wp-content/images/pin-2x.png?bust=' +  (new Date()).getTime() +'';
 	                filters = {};
-	                this.appView.init(mapOptions,markersIconCondition,filters,function(){});
+	                this.EasyMap.Views.appView.init(mapOptions,markersIconCondition,filters,function(){});
 					
 					
 				});
 
 				afterEach(function() {
-					this.appView = "";
-					this.mapView = "";
 					this.spyMapView.reset();
 					this.spyAppView.reset();
 				});
@@ -57,9 +52,10 @@ define([
 				it("should init the app",function(){
 					expect(this.spyAppView.calledOnce).toBeTruthy();
 					expect(this.spyMapView.calledOnce).toBeTruthy();
+					expect(this.EasyMap.Views.appView.$el.selector).toBe('div#easymap');
+					expect(typeof this.EasyMap.Views.appView.currentPosition).not.toBe(null);
+					expect(typeof this.EasyMap.Views.appView.currentAddresss).not.toBe(null);
 					
-					expect(this.appView.$el.selector).toBe('div#easymap');
-					expect(typeof this.appView.currentPosition.lat).toBe('function');
 				});
 			});
 

@@ -11,7 +11,6 @@ define([
      		this.collection = Points;
      	},
      	refresh: function(){
-            console.log('list refresh', this.collection);
             if(this.itemTemplate == ''){
                 throw "you have to define the item template";
             }

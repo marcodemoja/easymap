@@ -53,7 +53,9 @@
   // we are using RequireJS `window.onload()` has already been triggered so we have to manually call it again. This will
   // initialize the HTML Reporter and execute the environment.
   require(['boot','backbone'], function () {
-
+    /*append box*/
+    var fixtures = '<div id="easymap"></div>';
+    $('body').append(fixtures);
     // Load the specs
     require(specs, function () {
 

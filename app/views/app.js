@@ -1,4 +1,4 @@
-var EasyMap = EasyMap || {};
+var EasyMap = EasyMap || {Views:{},Env: 'dev'};
 define([
   'app/collections/points',
   'text!templates/app.html',
@@ -13,9 +13,10 @@ define([
         template: _.template(appTemplate),
         filtersTemplate: "",
         currentPosition:{},
+        currentAddress:{},
         autoLocateMyPosition:true,    
         autoComplete:{},
-        
+
         events: {
               "touchstart #easymap-switch-view-button"   : "switchListMapButtonEvent",
               "touchstart .easymap-expand-item-list-btn" : "openStoreDetail",
@@ -35,6 +36,8 @@ define([
           this.listenTo(this.collection,'reset',this.refresh);
           /*update properties views and input values in DOM*/
           this.listenTo(this,'addresschanged',this.onAddressChange);
+          
+
         },
     
         init: function(mapOptions,markersIconCondition,filters,_callback){
@@ -43,13 +46,15 @@ define([
           }
           var self = this;
         	//this.setMarkersIconConditions(markersIconCondition);
-        	mapView.mapOptions = mapOptions;
-          mapView.markersIconCondition = markersIconCondition;
+          EasyMap.Views.mapView.mapOptions = mapOptions;
+          EasyMap.Views.mapView.markersIconCondition = markersIconCondition;
+          
+          /*render all the sub views*/
           this.renderApp();
 
-          this.collection.fetch({
-            success:self.buildSearch()
-          });
+          /*fetch points collection and search points from init params configuration*/
+          this.collection.fetch({success:self.buildSearch()});
+
           // this.prepareEvents();
           if(typeof(_callback) !== 'undefined')
             _callback();    
@@ -58,32 +63,30 @@ define([
         buildSearch: function(){
           var self = this;
           if(this.autoLocateMyPosition === true){
-            self.geolocateClientPosition(function(position){
-              self.findAround(this.currentPosition);   
-            });
+            self.geolocateClientPosition(function(){});
+            self.on('addresschanged',function(){self.findAround();}); 
+            self.on('refreshall',function(){ EasyMap.Views.mapView.autofitMap();}); 
           }else{
                 this.refresh();
           }
         },
 
         renderApp:function(){
-          console.log('renderApp');
-            this.$el.append(this.template);
             this.render();
-            mapView.render();
+            EasyMap.Views.mapView.render();
             listView.render();
         },
 
         refresh: function(){
-            console.log('refresh app');
-            mapView.refresh();
-            listView.refresh();
+            var self = this;
+            $.when(EasyMap.Views.mapView.refresh(),listView.refresh()).done(function(){
+                self.trigger('refreshall');
+                self.logMessage('refreshall triggered');
+            });
         },
 
-        findAround: function(position,_callback){
+        findAround: function(_callback){
             this.collection.filterByDistance(this.currentPosition);
-            console.log(mapView.markerSearch.getPosition());
-            mapView.autofitMap();
             if(typeof(_callback) !== 'undefined')
                 _callback();
         },
@@ -94,6 +97,7 @@ define([
            $.getJSON(url,function(response){
                _callback(response);
                self.trigger('addresschanged');
+               self.logMessage('addresschanged triggered');
            }).error(function(jqXHR, textStatus, errorThrown){
                if(errorThrown == 'No Transport'){
                    $.support.cors = true;
@@ -108,11 +112,11 @@ define([
            var self  = this;
            if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                       self.currentPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);       
                        self.getAddressFromLatLng('http://maps.googleapis.com/maps/api/geocode/json?latlng='+position.coords.latitude+","+position.coords.longitude,function(response){
+                            self.currentPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);       
                             self.currentAddress = response.results[0].formatted_address;
+                            _callback();
                         });
-                        _callback(self.currentPosition);
                 });
             }
         },
@@ -121,7 +125,6 @@ define([
         * Obtain coordinates from address passed as param and center map to it
         **/
         geocodeAddress: function(address,_callback){
-          this.trigger('searchAddress:beforeAddressGeocoded');
           var geocoder = new google.maps.Geocoder();
           var self = this;
           geocoder.geocode( { 'address': address}, function(results, status) {
@@ -129,6 +132,7 @@ define([
               self.currentPosition = results[0].geometry.location;
               self.currentAddress = address;
               self.trigger('addresschanged');
+              self.logMessage('addresschanged triggered');
               _callback(self.currentPosition);
             } else {
               alert("Invalid address");
@@ -140,9 +144,8 @@ define([
         onAddressChange: function(){
             $('#easymap-input-search').val(this.currentAddress);
             $('#coords').val(this.currentPosition.lat()+","+this.currentPosition.lng());
-            
             /*create marker of address searched from the map view*/
-            mapView.createMarkerSearch(this.currentPosition);
+            EasyMap.Views.mapView.createMarkerSearch(this.currentPosition);
         },
 
         searchAddress: function(e){
@@ -177,7 +180,7 @@ define([
             result = addressFromInput;
           }
           this.setCookie('address' , result, 2);
-          mapView.searchedAddress = result;
+          EasyMap.Views.mapView.searchedAddress = result;
 
           return result;
         },
@@ -208,13 +211,19 @@ define([
         },
 
         render: function(){
+           this.$el.append(this.template);
             return this;
+        },
+        logMessage: function(message){
+          if(EasyMap.Env == 'dev')
+            console.log(message);
         }
+        
     });
 
-    EasyMap = new _EasyMap();
+    EasyMap.Views.appView = new _EasyMap();
     // Returning instantiated views can be quite useful for having "state"
-    return EasyMap;
+    return EasyMap.Views.appView;
 
 
 });

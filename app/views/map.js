@@ -1,3 +1,4 @@
+var EasyMap = EasyMap || {Views:{}};
 define([
   'app/collections/points',
   'text!templates/map.html'
@@ -7,7 +8,7 @@ define([
          
          el: $('#easymap'),
          markers:[],
-         markerSearch:{},
+         markerSearch:null,
          markersInfoWindows:[],
          markersInfoWindowTemplate : '',
          map:null,
@@ -31,7 +32,6 @@ define([
       	refresh: function(){
             this.removeMarkers();
             this.addMarkers();
-            this.autofitMap();
         },
        
         activate: function() {
@@ -55,7 +55,6 @@ define([
             
              }
             var mapContainer = this.$('#google-map');
-            console.log(mapContainer);
             this.map = new google.maps.Map(mapContainer.get(0), this.mapOptions);
         },
 
@@ -122,11 +121,9 @@ define([
         * Fit map for viewing all markers showed
         **/
         autofitMap: function(){
-        	var bounds = new google.maps.LatLngBounds();
-
+            var bounds = new google.maps.LatLngBounds();
             /*current position must be added to bound*/
             bounds.extend(this.markerSearch.getPosition());
-            
             _.each(this.markers,function(marker){
         		if(marker.visible == true)
         			bounds.extend(marker.getPosition());
@@ -275,7 +272,6 @@ define([
          
          addMarkers:function(){
          	var self = this;
-            console.log(this.map);
             _.each(this.collection.models,function(point,index,list){
          		var position = new google.maps.LatLng( point.attributes.lat, point.attributes.lng);
          		var iconUrl  = '';
@@ -361,8 +357,8 @@ define([
         },
      }); //-- End of Map view
      
-     var  _mapView = new mapView();
+     EasyMap.Views.mapView = new mapView();
      
-     return _mapView;
+     return EasyMap.Views.mapView;
  
 });
