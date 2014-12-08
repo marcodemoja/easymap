@@ -1,7 +1,5 @@
-
 # EasyMap
-
-A short introduction of this app could easily go here.
+Build your own map , search locations from your own database
 
 ## Dependencies
 * [Gmaps API](https://maps.googleapis.com/maps/api/)
@@ -21,7 +19,3 @@ To run in nodejs server mode:
 * `node server.js`
 * Visit your app at http://localhost:8081/index.html
 
-=======
-# EasyMap
-
-## Build your own map , search locations from your own database
