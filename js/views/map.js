@@ -8,87 +8,68 @@ define([
      var mapView = Backbone.View.extend({
          
          el: $('#easymap'),
-         
          markers:[],
-
          markersInfoWindows:[],
-
          markersInfoWindowTemplate : '',
-
          map:{},
-         
          markersInBound:[],
-         
          useClusters:false,
-         
          markersIconCondition:null,
-         
          enableMarkerClick:true,
-         
          searchedCoords:null,
-         
          searchedAddress:null,
-         
          asyncSearch:true,
-         
          template: _.template(mapTemplate),
-
-         currentAddress:'',
-
          directionsService  : new google.maps.DirectionsService(),
-
          directionsDisplay : new google.maps.DirectionsRenderer(),
 
         initialize:function(){
          	var that  = this;
             var result;
          	this.collection = app.Collections.Points;
-
         },
       	
-      	activate: function(mapOptions) {
+      	render:function(mapOptions){
+       		this.$el.append(this.template);
+         	this.activate(mapOptions);
+         	return this;
+         	
+        },
+
+        refresh: function(){
+            this.removeMarkers();
+            this.addMarkers();
+            this.autofitMap();
+        },
+       
+        activate: function(mapOptions) {
             if(this.template == ''){
                 throw "you have to define the map template";
             }
 
             if(typeof(mapOptions) == 'undefined'){
-         		 var latlng = new google.maps.LatLng(35.5, -100);
-         		this.mapOptions = {
-	                 zoom: 8,
-	                 center: latlng,
-	                 mapTypeControl: false,
-	                 navigationControl:false,
-	                 maxZoom:11,
-	                 minZoom:8,
-	                 mapTypeId: google.maps.MapTypeId.ROADMAP,
-	                 streetViewControl: false,
-	                 styles: [{featureType:"administrative",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"landscape.natural",stylers:[{hue:"#0000ff"},{lightness:-84},{visibility:"off"}]},{featureType:"water",stylers:[{visibility:"on"},{saturation:-61},{lightness:-63}]},{featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"road",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"landscape",stylers:[{visibility:"off"}]},{featureType:"administrative",stylers:[{visibility:"off"}]},{},{}]
-	              };
-         	
-         	 }else{
-         		this.mapOptions = mapOptions;
-         	 }
-             var mapContainer = this.$('#google-map');
-             mapContainer.height(this.$('body').height).width(this.$('body').width);
-             this.map = new google.maps.Map(mapContainer.get(0), this.mapOptions);
-         },
+                 var latlng = new google.maps.LatLng(35.5, -100);
+                this.mapOptions = {
+                     zoom: 8,
+                     center: latlng,
+                     mapTypeControl: false,
+                     navigationControl:false,
+                     maxZoom:11,
+                     minZoom:8,
+                     mapTypeId: google.maps.MapTypeId.ROADMAP,
+                     streetViewControl: false,
+                     styles: [{featureType:"administrative",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"landscape.natural",stylers:[{hue:"#0000ff"},{lightness:-84},{visibility:"off"}]},{featureType:"water",stylers:[{visibility:"on"},{saturation:-61},{lightness:-63}]},{featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"road",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"landscape",stylers:[{visibility:"off"}]},{featureType:"administrative",stylers:[{visibility:"off"}]},{},{}]
+                  };
+            
+             }else{
+                this.mapOptions = mapOptions;
+             }
+            var mapContainer = this.$('#google-map');
+            mapContainer.height(this.$('body').height).width(this.$('body').width);
+            this.map = new google.maps.Map(mapContainer.get(0), this.mapOptions);
+        },
          
-         render:function(mapOptions){
-       		this.$el.append(this.template);
-         	this.activate(mapOptions);
-         	return this;
-         	
-         },
-
-         refresh: function(){
-            this.removeMarkers();
-            this.addMarkers();
-         },
-       
-         filterResultsList: function(){
-
-         },
-         /**
+        /**
           * Add loader to map
           * This method append a div with class storelocator-loader to the map container (this.$el)
           */
@@ -104,14 +85,7 @@ define([
         removeLoader: function(){
       		$('.easymap-loader').remove();
       	},
-        /*
-        * Render markers closest to address passed as argument
-        * @params address
-        * */
-        searchByAddress: function(address){
-        	this.geocodeAddress(address);
-        },
-        
+
         showMarkersByLatLng: function(latLng){
         	this.centerMap(latLng);
         },
@@ -143,99 +117,19 @@ define([
         /*
         * Fit map for viewing all markers showed
         **/
-        autofitMap: function(){
+        autofitMap: function(position){
         	var bounds = new google.maps.LatLngBounds();
+            /*current position must be added to bound*/
+            bounds.extend(position);
         	_.each(this.markers,function(marker){
         		if(marker.visible == true)
         			bounds.extend(marker.getPosition());
         	});
-            console.log(bounds);
-        	this.map.fitBounds(bounds);
+            this.map.fitBounds(bounds);
         },
-        /**
-        * Obtain coordinates from address passed as param and center map to it
-        **/
-        geocodeAddress: function(address){
-             this.trigger('searchAddress:beforeAddressGeocoded');
-        	 var geocoder = new google.maps.Geocoder();
-        	 var self = this;
-        	 geocoder.geocode( { 'address': address}, function(results, status) {
-			     if (status == google.maps.GeocoderStatus.OK) {
-                    var pointCoords = results[0].geometry.location;
-                    //console.log(pointCoords.lat());
-                    //In this case it creates a marker, but you can get the lat and lng from the location.LatLng
-			        self.searchedCoords = { 'lat' : pointCoords.lat() , 'lng':pointCoords.lng()};
-                    self.$('#searchedCoords').val(pointCoords.lng()+','+pointCoords.lng());
-                    self.searchedAddress = address;
-                    self.removeMarkers();
-         			self.map.setCenter(pointCoords);
-			       /* var marker = new google.maps.Marker({
-			            map: self.map,
-			            position: results[0].geometry.location
-			        });*/
-			        
-			       //__callback({lat:results[0].geometry.location.A,lng:results[0].geometry.location.K});
-			       self.trigger('searchAddress:addressGeocoded');
-			     } else {
-			        alert("Invalid address");
-			        self.removeLoader();
-			     }
-			 });
-        },
-
-       getAddressFromLatLng: function(url,_callback){
-           var self  = this;
-           //$.support.cors = true;
-           $.getJSON(url,function(response){
-               _callback(response);
-           }).error(function(jqXHR, textStatus, errorThrown){
-               if(errorThrown == 'No Transport'){
-                   $.support.cors = true;
-                   self.getAddressFromLatLng(url, _callback);
-               }else{
-                   self.staticPosition();
-               }
-           });
-       },
-        
-       getCurrentPosition: function(){
-           var self  = this;
-           if(!navigator.userAgent.match(/(Lumia)/)){
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        self.getAddressFromLatLng('http://maps.googleapis.com/maps/api/geocode/json?latlng='+position.coords.latitude+","+position.coords.longitude,function(response){
-                            self.currentAddress = response.results[0].formatted_address;
-                            self.searchedAddress = response.results[0].formatted_address;
-                            self.currentPosition = new google.maps.LatLng(position.coords.latitude , position.coords.longitude);
-                            app.Views.MapView.centerMap(self.currentPosition);
-                            app.Views.MapView.zoomMap(9);
-                            $('#storelocator-input-search').val(self.currentAddress);
-                            $('#storelocator-input-search-mobile').val(self.currentAddress);
-                            $('.direction-a').val(self.currentAddress);
-                            $('#searchedCoords').val(position.coords.latitude+","+position.coords.longitude);
-                            self.searchedCoords = {'lat':position.coords.latitude,'lng':position.coords.longitude};
-                            self.trigger('geocoder:positionFinded');
-
-                        });
-                    }, self.staticPosition());
-                }
-        }else{
-            self.staticPosition();
-        }
-
-       },
-        
-        staticPosition:function(){
-            var self  = this;
-            self.currentPosition = new google.maps.LatLng(45.8485269, 8.9463012);
-            $('#searchedCoords').val("45.8485269,8.9463012");
-            self.stores = self.collection.findAround({lat:45.8485269,lng:8.9463012});
-            app.Views.MapView.centerMap(self.currentPosition);
-            app.Views.MapView.zoomMap(9);
-            self.trigger('geocoder:positionFinded');
-        },
-        
+       
         centerMap:function(coords){
+            console.log(coords);
          	this.map.setCenter(coords);
          },
          
@@ -261,10 +155,11 @@ define([
          },
          
          removeMarkers: function(){
-         	return _.each(this.markers,function(el,index,list){
+            var self = this;
+         	_.each(this.markers,function(el,index,list){
          			el.setMap(null);
-                    unset(this.markers[index]);
-         	});
+            });
+            this.markers = [];
          },
 
          markerInfoWindow: function(markerInfo){

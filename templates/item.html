@@ -14,7 +14,7 @@
                    <h3 class="itemTitle title<%= item.attributes.id %>"><%= item.attributes.name %></h3>
                    <p><%= item.attributes.gmap_address %> - <%= item.attributes.city %></p>
                </div>
-               <div class="storelocator-get-direction-btn block"><p><a href="#" onclick="$(this).attr('href' , 'https://maps.google.com/maps?daddr=<%= item.attributes.lat %>,<%= item.attributes.lng %>&saddr='+$('#searchedCoords').val());" target="_blank"><%= labels.getdirection %></a></p></div>
+               <div class="storelocator-get-direction-btn block"><p><a href="#" onclick="$(this).attr('href' , 'https://maps.google.com/maps?daddr=<%= item.attributes.lat %>,<%= item.attributes.lng %>&saddr='+$('#searchedCoords').val());" target="_blank"></a></p></div>
                <div  style="<%= classPadding %>" class="storelocator-additional-info-item-list hide">
                		<div class="opening-time">
               		<% if(item.attributes.opening_times != ''){ %>

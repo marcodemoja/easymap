@@ -14,7 +14,7 @@
                             position: google.maps.ControlPosition.TOP_RIGHT
                         },
                         maxZoom:19,
-                        minZoom:6,
+                        minZoom:2,
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
                         streetViewControl: false,
                         disableDefaultUI: false
@@ -28,7 +28,7 @@
                 };
                 markersIconCondition.icon =  'http://cdn3.yoox.biz/napapijri/wp-content/images/pin-2x.png?bust=' +  (new Date()).getTime() +'';
                 filters = {};
-                EasyMap.initApp(mapOptions,markersIconCondition,filters,function(){});
+                EasyMap.init(mapOptions,markersIconCondition,filters,function(){});
         });
     });
 

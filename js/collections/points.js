@@ -36,8 +36,7 @@ define([
          	return _return;
   		});
 
-      this.trigger('changed');
-
+      this.reset(result);
       return result;
 
   	},
@@ -46,14 +45,15 @@ define([
         var self = this;
         var result = _.filter(this.models,function(item){
             try{
-                var distance = self.getDistance(item.get('lat') ,item.get('lng'), position.lat, position.lng, 'K');
+                var distance = self.getDistance(item.get('lat') ,item.get('lng'), position.lat(), position.lng(), 'K');
                 item.attributes.distance = distance;
+                console.log(distance);
                 return distance >= 0 && distance <= 80;
             }catch(err){
-                return true;
+                return false;
             }
     	   });
-        this.trigger('changed');
+        this.reset(result);
         return result;
     },
 

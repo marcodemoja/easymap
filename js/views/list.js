@@ -13,7 +13,6 @@ define([
      		this.collection = app.Collections.Points;
      	},
      	refresh: function(){
-            console.log('addElements');
             if(this.itemTemplate == ''){
                 throw "you have to define the item template";
             }
