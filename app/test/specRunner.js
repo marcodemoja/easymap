@@ -2,24 +2,27 @@
   'use strict';
   // Configure RequireJS to shim Jasmine
   require.config({
-            baseUrl: "../",
+            baseUrl: "../../",
             paths: {
-                "jquery":"js/node_modules/jquery/dist/jquery",
-                "json-stringify":"js/node_modules/json-stringify/test/json-stringify",
-                "sinon" :"js/lib/sinon",
-                "jasmine-sinon":"js/lib/jasmine-sinon",
-                "jasmine":"js/lib/jasmine-2.1.3/jasmine",
-                "jasmine-html":"js/lib/jasmine-2.1.3/jasmine-html",
-                "boot":"js/lib/jasmine-2.1.3/boot",
-                "underscore": "js/node_modules/underscore/underscore",
-                "backbone":"js/node_modules/backbone/backbone",
-                "domReady": "js/node_modules/requirejs/dom-ready",
-                "models": "js/models",
-                "views":"js/views",
-                "collections":"js/collections",
+                "jquery":"node_modules/jquery/dist/jquery",
+                "json-stringify":"node_modules/json-stringify/test/json-stringify",
+                "sinon" :"lib/sinon",
+                "jasmine-sinon":"lib/jasmine-sinon",
+                "jasmine":"lib/jasmine-2.1.3/jasmine",
+                "jasmine-html":"lib/jasmine-2.1.3/jasmine-html",
+                "boot":"lib/jasmine-2.1.3/boot",
+                "underscore": "node_modules/underscore/underscore",
+                "backbone":"node_modules/backbone/backbone",
+                "domReady": "node_modules/requirejs/dom-ready",
+                "models": "models",
+                "views":"views",
+                "collections":"collections",
                 "templates":"templates"
             },
             shim: {
+              'backbone':{
+                  deps:['jquery']
+              },
               'jasmin-sinon':{
                 deps:['jasmine']
               },	
@@ -41,15 +44,15 @@
 
   // Define all of your specs here. These are RequireJS modules.
   var specs = [
-    'test/spec/specPointsCollection',
-    'test/spec/specAppView'
+    'app/test/spec/specAppView',
+  //  'app/test/spec/specPointsCollection'
   ];
 
   // Load Jasmine - This will still create all of the normal Jasmine browser globals unless `boot.js` is re-written to use the
   // AMD or UMD specs. `boot.js` will do a bunch of configuration and attach it's initializers to `window.onload()`. Because
   // we are using RequireJS `window.onload()` has already been triggered so we have to manually call it again. This will
   // initialize the HTML Reporter and execute the environment.
-  require(['boot'], function () {
+  require(['boot','backbone'], function () {
 
     // Load the specs
     require(specs, function () {

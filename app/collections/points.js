@@ -1,11 +1,9 @@
-// Filename: collections/stores
-var app = app || {Router:{},Models:{},Collections:{},Views:{},inizialite:function(){}};
 define([
-  'js/models/point'
+  'app/models/point'
 ], function(Point){
 	
    var Points = Backbone.Collection.extend({
-       model: app.Models.Point,
+       model: Point,
        url: 'data/data.json',
        sort_key: 'distance',
 
@@ -36,8 +34,8 @@ define([
          	return _return;
   		});
 
-      this.reset(result);
-      return result;
+      return this.reset(result);
+     //return result;
 
   	},
     
@@ -47,14 +45,13 @@ define([
             try{
                 var distance = self.getDistance(item.get('lat') ,item.get('lng'), position.lat(), position.lng(), 'K');
                 item.attributes.distance = distance;
-                console.log(distance);
                 return distance >= 0 && distance <= 80;
             }catch(err){
                 return false;
             }
     	   });
-        this.reset(result);
-        return result;
+        return this.reset(result);
+        //return result;
     },
 
     getDistance: function(lat1, lon1, lat2, lon2, unit){
@@ -74,8 +71,8 @@ define([
   	}
   	
   });
-  app.Collections.Points = new Points();
+  var _points = new Points();
   
-  return app.Collections.Points;
+  return _points;
   
 });

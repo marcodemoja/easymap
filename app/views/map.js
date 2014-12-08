@@ -1,7 +1,5 @@
-// Filename: views/project/list
-var app = app || {Router:{},Models:{},Collections:{},Views:{},inizialite:function(){}};
 define([
-  'js/collections/points',
+  'app/collections/points',
   'text!templates/map.html'
 ], function(Points,mapTemplate){
      
@@ -9,9 +7,10 @@ define([
          
          el: $('#easymap'),
          markers:[],
+         markerSearch:{},
          markersInfoWindows:[],
          markersInfoWindowTemplate : '',
-         map:{},
+         map:null,
          markersInBound:[],
          useClusters:false,
          markersIconCondition:null,
@@ -26,28 +25,21 @@ define([
         initialize:function(){
          	var that  = this;
             var result;
-         	this.collection = app.Collections.Points;
+         	this.collection = Points;
         },
       	
-      	render:function(mapOptions){
-       		this.$el.append(this.template);
-         	this.activate(mapOptions);
-         	return this;
-         	
-        },
-
-        refresh: function(){
+      	refresh: function(){
             this.removeMarkers();
             this.addMarkers();
             this.autofitMap();
         },
        
-        activate: function(mapOptions) {
+        activate: function() {
             if(this.template == ''){
                 throw "you have to define the map template";
             }
 
-            if(typeof(mapOptions) == 'undefined'){
+            if(typeof(this.mapOptions) == 'undefined'){
                  var latlng = new google.maps.LatLng(35.5, -100);
                 this.mapOptions = {
                      zoom: 8,
@@ -61,12 +53,24 @@ define([
                      styles: [{featureType:"administrative",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"landscape.natural",stylers:[{hue:"#0000ff"},{lightness:-84},{visibility:"off"}]},{featureType:"water",stylers:[{visibility:"on"},{saturation:-61},{lightness:-63}]},{featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"road",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"landscape",stylers:[{visibility:"off"}]},{featureType:"administrative",stylers:[{visibility:"off"}]},{},{}]
                   };
             
-             }else{
-                this.mapOptions = mapOptions;
              }
             var mapContainer = this.$('#google-map');
-            mapContainer.height(this.$('body').height).width(this.$('body').width);
+            console.log(mapContainer);
             this.map = new google.maps.Map(mapContainer.get(0), this.mapOptions);
+        },
+
+        createMarkerSearch: function(position){
+            var marker = new google.maps.Marker({
+                position: position,
+                map: this.map,
+                title: 'address searched',
+                visible:false,
+                    //icon:iconImage,
+                    //storeTypeId:store.attributes.store_type_id,
+                    //filters:filters
+                });
+            this.markerSearch = marker;
+            return this.markerSearch;
         },
          
         /**
@@ -117,11 +121,13 @@ define([
         /*
         * Fit map for viewing all markers showed
         **/
-        autofitMap: function(position){
+        autofitMap: function(){
         	var bounds = new google.maps.LatLngBounds();
+
             /*current position must be added to bound*/
-            bounds.extend(position);
-        	_.each(this.markers,function(marker){
+            bounds.extend(this.markerSearch.getPosition());
+            
+            _.each(this.markers,function(marker){
         		if(marker.visible == true)
         			bounds.extend(marker.getPosition());
         	});
@@ -269,6 +275,7 @@ define([
          
          addMarkers:function(){
          	var self = this;
+            console.log(this.map);
             _.each(this.collection.models,function(point,index,list){
          		var position = new google.maps.LatLng( point.attributes.lat, point.attributes.lng);
          		var iconUrl  = '';
@@ -276,7 +283,7 @@ define([
          		var filters  = [];
          		var filter;
          		
-         		if(typeof self.markersIconCondition !== "undefined" && self.markersIconCondition !== {}){
+                /*if(typeof self.markersIconCondition !== "undefined" && self.markersIconCondition !== {} && typeof self.markersIconCondition !== null ){
          			if(typeof(self.markersIconCondition.icon) !== 'undefined'){
                         iconUrl = self.markersIconCondition.icon;
                     }else{
@@ -286,7 +293,7 @@ define([
                             }
                         });
                     }
-                }
+                }*/
          		/*for(var i in point.attributes.store_collections){
          			filter = _.keys(store.attributes.store_collections[i]).toString();
          			filters.push(filter);
@@ -344,11 +351,18 @@ define([
 		     }
 		     this.trigger('markersready');
 		     //console.log(this.markers);
-         }
+         },
+
+         render:function(){
+            this.$el.append(this.template);
+            this.activate();
+            return this;
+            
+        },
      }); //-- End of Map view
      
-     app.Views.MapView = new mapView();
+     var  _mapView = new mapView();
      
-     return app.Views.MapView;
+     return _mapView;
  
 });

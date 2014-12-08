@@ -1,14 +1,13 @@
 define([
-		'collections/points',
-		'models/point'
+		'app/collections/points'
 	],
-	function(Points,Point){
+	function(Points){
 
 		describe("app.Collections.Points",
 			function(){
 				
 				 beforeEach(function () {
-				    	this.points = app.Collections.Points; 
+				    	this.points = Points; 
 				        
 				    	this.fixture = {
 				    		Points:

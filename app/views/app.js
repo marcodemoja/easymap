@@ -1,9 +1,9 @@
 var EasyMap = EasyMap || {};
 define([
-  'js/collections/points',
+  'app/collections/points',
   'text!templates/app.html',
-  'js/views/map',
-  'js/views/list'
+  'app/views/map',
+  'app/views/list'
 ], function(Points,appTemplate,mapView,listView){
 
    var _EasyMap = Backbone.View.extend({
@@ -30,13 +30,11 @@ define([
 	
         initialize: function(){
         	//this.model      = app.Models.Point;
-        	this.collection = app.Collections.Points;
-
-            /*refresh all views when collection change and sync*/
-            this.listenTo(this.collection,'reset',this.refresh);
-            /*update input values in DOM*/
-            this.listenTo(this,'addresschanged',this.onAddressChange);
-
+        	this.collection = Points;
+          /*refresh all views when collection change and sync*/
+          this.listenTo(this.collection,'reset',this.refresh);
+          /*update properties views and input values in DOM*/
+          this.listenTo(this,'addresschanged',this.onAddressChange);
         },
     
         init: function(mapOptions,markersIconCondition,filters,_callback){
@@ -45,41 +43,47 @@ define([
           }
           var self = this;
         	//this.setMarkersIconConditions(markersIconCondition);
-        	this.mapOptions = mapOptions;
-          app.Views.MapView.markersIconCondition = markersIconCondition;
+        	mapView.mapOptions = mapOptions;
+          mapView.markersIconCondition = markersIconCondition;
           this.renderApp();
 
           this.collection.fetch({
-            success:function(){
-              if(self.autoLocateMyPosition === true){
-                self.geolocateClientPosition(function(position){
-                  self.findAround(position);   
-                });
-              }else{
-                self.refresh();
-              }        
-            }
+            success:self.buildSearch()
           });
           // this.prepareEvents();
           if(typeof(_callback) !== 'undefined')
             _callback();    
         },
 
+        buildSearch: function(){
+          var self = this;
+          if(this.autoLocateMyPosition === true){
+            self.geolocateClientPosition(function(position){
+              self.findAround(this.currentPosition);   
+            });
+          }else{
+                this.refresh();
+          }
+        },
+
         renderApp:function(){
+          console.log('renderApp');
             this.$el.append(this.template);
             this.render();
-            app.Views.MapView.render(this.mapOptions);
-            app.Views.ListView.render();
+            mapView.render();
+            listView.render();
         },
 
         refresh: function(){
-            app.Views.MapView.refresh();
-            app.Views.ListView.refresh();
+            console.log('refresh app');
+            mapView.refresh();
+            listView.refresh();
         },
 
         findAround: function(position,_callback){
-            this.collection.filterByDistance(position);
-            mapView.autofitMap(position);
+            this.collection.filterByDistance(this.currentPosition);
+            console.log(mapView.markerSearch.getPosition());
+            mapView.autofitMap();
             if(typeof(_callback) !== 'undefined')
                 _callback();
         },
@@ -136,6 +140,9 @@ define([
         onAddressChange: function(){
             $('#easymap-input-search').val(this.currentAddress);
             $('#coords').val(this.currentPosition.lat()+","+this.currentPosition.lng());
+            
+            /*create marker of address searched from the map view*/
+            mapView.createMarkerSearch(this.currentPosition);
         },
 
         searchAddress: function(e){
@@ -204,6 +211,7 @@ define([
             return this;
         }
     });
+
     EasyMap = new _EasyMap();
     // Returning instantiated views can be quite useful for having "state"
     return EasyMap;

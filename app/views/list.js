@@ -1,7 +1,5 @@
-// Filename: views/project/list
-var app = app || {Router:{},Models:{},Collections:{},Views:{},inizialite:function(){}};
 define([
-  'js/collections/points',
+  'app/collections/points',
   'text!templates/list.html',
   'text!templates/item.html'
 ], function( Points , listTemplate, itemTemplate){
@@ -10,9 +8,10 @@ define([
      	template: _.template(listTemplate),
         itemTemplate: _.template(itemTemplate),
      	initialize:function(){
-     		this.collection = app.Collections.Points;
+     		this.collection = Points;
      	},
      	refresh: function(){
+            console.log('list refresh', this.collection);
             if(this.itemTemplate == ''){
                 throw "you have to define the item template";
             }
@@ -27,6 +26,7 @@ define([
      	}
      });
      
-     app.Views.ListView = new listView();
+     var _listView = new listView();
 
+     return _listView;
 });
